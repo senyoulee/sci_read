@@ -1,7 +1,7 @@
 import requests
 import time
 import xml.etree.ElementTree as ET
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from config import CATEGORIES, ARXIV_API_URL, MAX_RESULTS_PER_REQUEST, AUTHORS_CAP, FETCH_DELAY
 
 ARXIV_NS = {
@@ -93,13 +93,15 @@ def fetch_papers_for_category(category, date_from, date_to):
 
 
 def fetch_daily():
-    """Fetch recent papers (last 2 days) for all categories."""
-    today = datetime.utcnow().date()
-    two_days_ago = today - timedelta(days=2)
+    """Fetch recent papers (last 7 days) for all categories.
+    Wide window accounts for weekends/holidays; DB dedup prevents duplicates.
+    """
+    today = datetime.now(timezone.utc).date()
+    two_days_ago = today - timedelta(days=7)
 
     all_papers = []
     for cat in CATEGORIES:
-        print(f"  Fetching {cat} ({two_days_ago} to {today})...")
+        print(f"  Fetching {cat} ({today - timedelta(days=7)} to {today})...")
         papers = fetch_papers_for_category(cat, two_days_ago, today)
         print(f"    Found {len(papers)} papers")
         all_papers.extend(papers)
@@ -110,7 +112,7 @@ def fetch_daily():
 
 def fetch_backfill(period):
     """Fetch historical papers. period: '1y', '6m', '3m'"""
-    today = datetime.utcnow().date()
+    today = datetime.now(timezone.utc).date()
     days_map = {'1y': 365, '6m': 180, '3m': 90}
     if period not in days_map:
         raise ValueError(f"Unknown period: {period}. Choose from 1y, 6m, 3m.")

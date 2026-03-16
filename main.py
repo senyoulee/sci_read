@@ -1,5 +1,5 @@
 import argparse
-from datetime import datetime
+from datetime import datetime, timezone
 from fetcher import fetch_daily, fetch_backfill
 from storage import init_db, save_papers, search_papers
 from exporter import export_and_push
@@ -12,7 +12,7 @@ def cmd_fetch(args):
     print(f"Saved {len(new_papers)} new papers (out of {len(papers)} fetched)")
 
     if new_papers:
-        today = datetime.utcnow().strftime('%Y-%m-%d')
+        today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
         filename = f"daily_{today}.txt"
         export_and_push(new_papers, filename, f"[arxiv] Daily report {today}")
     else:
@@ -26,7 +26,7 @@ def cmd_backfill(args):
     new_papers = save_papers(papers)
     print(f"Saved {len(new_papers)} new papers (out of {len(papers)} fetched)")
 
-    today = datetime.utcnow().strftime('%Y-%m-%d')
+    today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
     filename = f"backfill_{period}_{today}.txt"
     export_and_push(papers, filename, f"[arxiv] Backfill {period} report {today}")
 
