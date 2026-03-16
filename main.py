@@ -11,12 +11,9 @@ def cmd_fetch(args):
     new_papers = save_papers(papers)
     print(f"Saved {len(new_papers)} new papers (out of {len(papers)} fetched)")
 
-    if new_papers:
-        today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
-        filename = f"daily_{today}.txt"
-        export_and_push(new_papers, filename, f"[arxiv] Daily report {today}")
-    else:
-        print("No new papers today, skipping report.")
+    today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+    filename = f"daily_{today}.txt"
+    export_and_push(papers, filename, f"[arxiv] Daily report {today}")
 
 
 def cmd_backfill(args):
